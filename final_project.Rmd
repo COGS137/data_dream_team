@@ -1,0 +1,71 @@
+---
+title: "CS02 - Vaping Behaviors in American Youth"
+author: "Adya Mishra, Connor McManigal, Donggyu(Alex) Yu, Mohamed Abdilahi - Data Dream Team"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+## Introduction
+- INTRODUCTION HERE
+
+### Load packages
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(olsrr)
+library(skimr)
+```
+
+## Questions
+
+1. 
+
+2. 
+
+## The Data
+- TALK ABOUT THE DATA HERE
+
+### Data Import
+```{r, eval = FALSE}
+
+```
+
+### Data Wrangling
+
+
+#### Save the Data
+```{r, eval = FALSE}
+save()
+```
+
+
+## Analysis
+```{r}
+load()
+```
+
+### Exploratory Data Analysis
+
+
+### Data Analysis
+
+#### Question 1: FILL IN HERE
+
+
+#### Q1: What's the answer?
+
+
+#### Question 2: FILL IN HERE
+
+
+#### Q2: What's the answer?
+
+
+### Results
+- RESULTS HERE
+
+## Conclusion
+- CONCLUSION HERE
