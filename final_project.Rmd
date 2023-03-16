@@ -1,5 +1,5 @@
 ---
-title: "CS02 - Vaping Behaviors in American Youth"
+title: "COGS137 Final Project: California Automobile Accidents 2021"
 author: "Adya Mishra, Connor McManigal, Donggyu(Alex) Yu, Mohamed Abdilahi - Data Dream Team"
 output: 
   html_document:
@@ -17,34 +17,130 @@ library(tidyverse)
 library(tidymodels)
 library(olsrr)
 library(skimr)
+library(lubridate)
 ```
 
 ## Questions
 
-1. 
+**1. Is there a relationship between the severity of car accidents and weather conditions in California?**
 
-2. 
+**2. In San Diego County, ...**
 
 ## The Data
 - TALK ABOUT THE DATA HERE
+- Explain variables
+- Original data set: 2,845,342 observations and 47 variables
+- Wrangled CA data set: 388,838 observations and 35 variables
+- SD data set: 24,177 observations and 35 variables
 
 ### Data Import
 ```{r, eval = FALSE}
-
+crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_updated.csv")
 ```
 
 ### Data Wrangling
 
+#### Extract Year and Filter For California Accidents That Happened in 2021
+- 
+```{r, eval = FALSE}
+crash$Year <- substr(crash$Start_Time, 1, 4)
+crash2021 <- crash[crash$Year == "2021", ]
+
+crashCA <- crash2021 |>
+  filter(State == "CA")
+```
+
+#### Extract Month and Day: Create Month and Day Variables
+- 
+```{r, eval = FALSE}
+crashCA$Month <- substr(crashCA$Start_Time, 6, 7)
+```
+
+```{r, eval = FALSE}
+crashCA$Day <- substr(crashCA$Start_Time, 9, 10)
+```
+
+#### Select Desired Variables and Arrange In An Order That Makes Sense
+- 
+```{r, eval = FALSE}
+crashCA <- crashCA |>
+  select("ID", "Day", "Month", "Year", "Zipcode", "County", "City", "Street", "Severity", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
+
+head(crashCA)
+```
+
+#### Rename Variables Containing Units & Change Variables to Only First Letter Capitalized 
+- 
+```{r}
+crashCA <- crashCA |>
+  rename(Distance = "Distance(mi)",
+         Temperature = "Temperature(F)",
+         Wind_chill = "Wind_Chill(F)",
+         Humidity = "Humidity(%)",
+         Pressure = "Pressure(in)",
+         Visibility = "Visibility(mi)",
+         Wind_direction = "Wind_Direction",
+         Wind_speed = "Wind_Speed(mph)",
+         Precipitation = "Precipitation(in)",
+         Weather_condition = "Weather_Condition",
+         Give_way = "Give_Way",
+         No_exit = "No_Exit",
+         Traffic_calming = "Traffic_Calming",
+         Traffic_signal = "Traffic_Signal",
+         Turning_loop = "Turning_Loop",
+         Time_of_day = "Sunrise_Sunset")
+```
+
+#### Save and Load Wrangled Data Because of Memory in RStudio
+- 
+```{r}
+save(crashCA, file = "wrangled_crashCA.rda")
+```
+
+```{r}
+load("wrangled_crashCA.rda")
+```
+
+#### Arrange in Chronological Order and Change A Few Variable Types
+- 
+```{r}
+crashCA <- crashCA |>
+  arrange(Month, Day) |>
+  mutate(Day = as.numeric(Day),
+         Month = as.numeric(Month),
+         Year = as.numeric(Year))
+```
+
+#### Create Date Variable
+-
+```{r}
+crashCA$Date <- dmy(paste(crashCA$Day, crashCA$Month, crashCA$Year, sep = "-"))
+```
+
+#### Rearange Variables
+- 
+```{r}
+crashCA <- crashCA |>
+  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
+```
+
+#### Filter For San Diego County
+- 
+```{r}
+crashSD <- crashCA |>
+  filter(County == "San Diego")
+```
 
 #### Save the Data
+- 
 ```{r, eval = FALSE}
-save()
+save(crashCA, crashSD, file = "wrangled_crashCA_crashSD.rda")
 ```
 
 
 ## Analysis
 ```{r}
-load()
+load("wrangled_crashCA_crashSD.rda")
 ```
 
 ### Exploratory Data Analysis
