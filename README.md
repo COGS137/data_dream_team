@@ -1,7 +1,8 @@
 ## COGS 137 Final Project
 
 NEEDS UPDATE
-- include brief overview
-- questions answered
-- key findings?
-- limitations?
+- Include brief overview(data+analysis process)
+- Questions answered
+- Key findings?
+- Limitations?
+- Link to video?
