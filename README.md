@@ -7,9 +7,10 @@
 
 2. In San Diego County, is there a relationship between severity of accidents and road infrastructure?
 
-- **Overview**(data+analysis process):
 
-- **Key findings**:
+**Overview**(data+analysis process):
+
+**Key findings**:
 
 
 **Links**:
