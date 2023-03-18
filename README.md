@@ -1,8 +1,18 @@
 ## COGS 137 Final Project
 
-NEEDS TO BE UPDATED
-- Include brief overview(data+analysis process)
-- Questions answered
-- Key findings?
-- Limitations?
-- Link to video?
+California & San Diego Accidents in 2021
+
+Questions Answered:
+1. In 2021, is there a relationship between the severity of car accidents and weather conditions in California?
+
+2. In San Diego County, is there a relationship between severity of accidents and road infrastructure?
+
+- Brief overview(data+analysis process):
+
+- Key findings:
+
+- Limitations:
+
+Links:
+- Link to Original Data: https://www.kaggle.com/datasets/sobhanmoosavi/us-accidents 
+- Link to Presentation Video:
