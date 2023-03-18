@@ -22,19 +22,19 @@ library(lubridate)
 
 ## Questions
 
-**1. Is there a relationship between the severity of car accidents and weather conditions in California?**
+**1. In 2021, is there a relationship between the severity of car accidents and weather conditions in California?**
 
-**2. In San Diego County, ...**
+**2. In San Diego County, is there a relationship between severity of accidents and road infrastructure?**
 
 ## The Data
 - TALK ABOUT THE DATA HERE
-- Explain variables
+- Explain variables(both ones we ended up using and not using)
 - Original data set: 2,845,342 observations and 47 variables
-- Wrangled CA data set: 388,838 observations and 35 variables
-- SD data set: 24,177 observations and 35 variables
+- Wrangled CA data set: 388,838 observations and 37 variables
+- SD data set: 24,177 observations and 37 variables
 
 ### Data Import
-```{r, eval = FALSE}
+```{r, message = FALSE, warning = FALSE}
 crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_updated.csv")
 ```
 
@@ -64,16 +64,18 @@ crashCA$Day <- substr(crashCA$Start_Time, 9, 10)
 - 
 ```{r, eval = FALSE}
 crashCA <- crashCA |>
-  select("ID", "Day", "Month", "Year", "Zipcode", "County", "City", "Street", "Severity", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
+  select("ID", "Day", "Month", "Year", "Zipcode", "County", "City", "Street", "Severity", "Start_Lat", "Start_Lng", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
 
 head(crashCA)
 ```
 
 #### Rename Variables Containing Units & Change Variables to Only First Letter Capitalized 
 - 
-```{r}
+```{r, eval = FALSE}
 crashCA <- crashCA |>
-  rename(Distance = "Distance(mi)",
+  rename(Latitude = "Start_Lat",
+         Longitude = "Start_Lng",
+         Distance = "Distance(mi)",
          Temperature = "Temperature(F)",
          Wind_chill = "Wind_Chill(F)",
          Humidity = "Humidity(%)",
@@ -93,17 +95,17 @@ crashCA <- crashCA |>
 
 #### Save and Load Wrangled Data Because of Memory in RStudio
 - 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 save(crashCA, file = "wrangled_crashCA.rda")
 ```
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 load("wrangled_crashCA.rda")
 ```
 
-#### Arrange in Chronological Order and Change A Few Variable Types
+#### Arrange in Chronological Order and Change Variable Types
 - 
-```{r}
+```{r, eval = FALSE}
 crashCA <- crashCA |>
   arrange(Month, Day) |>
   mutate(Day = as.numeric(Day),
@@ -113,20 +115,20 @@ crashCA <- crashCA |>
 
 #### Create Date Variable
 -
-```{r}
+```{r, eval = FALSE}
 crashCA$Date <- dmy(paste(crashCA$Day, crashCA$Month, crashCA$Year, sep = "-"))
 ```
 
 #### Rearange Variables
 - 
-```{r}
+```{r, eval = FALSE}
 crashCA <- crashCA |>
-  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
+  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
 #### Filter For San Diego County
 - 
-```{r}
+```{r, eval = FALSE}
 crashSD <- crashCA |>
   filter(County == "San Diego")
 ```
@@ -145,19 +147,31 @@ load("wrangled_crashCA_crashSD.rda")
 
 ### Exploratory Data Analysis
 
+```{r}
+skim(crashCA)
+```
+
+```{r}
+skim(crashSD)
+```
+
+
 
 ### Data Analysis
 
-#### Question 1: FILL IN HERE
+#### Question 1: In 2021, is there a relationship between the severity of car accidents and weather conditions in California?
+
 
 
 #### Q1: What's the answer?
 
 
-#### Question 2: FILL IN HERE
+#### Question 2: In San Diego County, is there a relationship between severity of accidents and road infrastructure and conditions?
+
 
 
 #### Q2: What's the answer?
+
 
 
 ### Results
