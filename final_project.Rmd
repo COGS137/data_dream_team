@@ -30,8 +30,8 @@ library(lubridate)
 - TALK ABOUT THE DATA HERE
 - Explain variables(both ones we ended up using and not using)
 - Original data set: 2,845,342 observations and 47 variables
-- Wrangled CA data set: 388,838 observations and 37 variables
-- SD data set: 24,177 observations and 37 variables
+- Wrangled CA data set: 388,838 observations and 38 variables
+- SD data set: 24,177 observations and 38 variables
 
 ### Data Import
 ```{r, message = FALSE, warning = FALSE}
@@ -119,11 +119,66 @@ crashCA <- crashCA |>
 crashCA$Date <- dmy(paste(crashCA$Day, crashCA$Month, crashCA$Year, sep = "-"))
 ```
 
+#### Create Function to Normalize Weather Condition Values
+- 56 unique values that need to be filtered and categorized
+- define each category and what it includes
+```{r}
+categorize_weather <- function(weather_data) {
+  
+  lookup <- tibble( # create look up table for referencing
+    Category = c("Fair", "Cloudy", "Stormy", "Windy", "Foggy", "Snowy", "Other"),
+    Keyword = list(
+      c("fair"),
+      c("cloudy", "overcast", "partly cloudy", "mostly cloudy"),
+      c("rain", "storm", "hail", "thunder", "heavy rain", "light rain", "heavy rain", "precipitation", "rain shower", "showers", "drizzle"),
+      c("windy", "squalls"),
+      c("fog", "mist", "haze"),
+      c("snow", "ice", "heavy snow", "light snow", "wintry mix"),
+      c("smoke", "duststorm", "dust")
+    )
+  )
+  
+  match_weather <- function(x) { # create function to extract keywords and place in proper weather category
+    if(is.na(x)) {
+      return(NA)
+    }
+    x <- tolower(x)
+    for (i in 1:length(lookup$Category)) {
+      pattern <- paste0(lookup$Keyword[[i]], collapse = "|")
+      if(any(str_detect(x, pattern))) {
+        return(lookup$Category[i])
+      }
+    }
+    return(lookup$Category[length(lookup$Category)])
+  }
+  
+  weather_data <- weather_data |> # apply the match_weather function
+    mutate(Weather_category = sapply(Weather_condition, match_weather)) # create new variable(Weather_category) that takes in Weather_condition and applies function on its values
+  
+  return(weather_data)
+}
+```
+
+#### Apply the Function From Above
+- 
+```{r}
+crashCA <- categorize_weather(crashCA)
+crashCA
+```
+
+#### Check Weather Category Counts
+- 
+```{r}
+crashCA |>
+  count(Weather_category) |>
+  arrange(desc(n))
+```
+
 #### Rearange Variables
 - 
 ```{r, eval = FALSE}
 crashCA <- crashCA |>
-  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
+  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
 #### Filter For San Diego County
@@ -137,6 +192,10 @@ crashSD <- crashCA |>
 - 
 ```{r, eval = FALSE}
 save(crashCA, crashSD, file = "wrangled_crashCA_crashSD.rda")
+```
+
+```{r}
+crashCA
 ```
 
 
@@ -154,7 +213,6 @@ skim(crashCA)
 ```{r}
 skim(crashSD)
 ```
-
 
 
 ### Data Analysis
