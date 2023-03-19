@@ -1,5 +1,5 @@
 ---
-title: "COGS137 Final Project: California Automobile Accidents 2021"
+title: "COGS137 Final Project: San Diego Automobile Accidents 2016-2021"
 author: "Adya Mishra, Connor McManigal, Donggyu(Alex) Yu, Mohamed Abdilahi - Data Dream Team"
 output: 
   html_document:
@@ -30,8 +30,7 @@ library(lubridate)
 - TALK ABOUT THE DATA HERE
 - Explain variables(both ones we ended up using and not using)
 - Original data set: 2,845,342 observations and 47 variables
-- Wrangled CA data set: 388,838 observations and 38 variables
-- SD data set: 24,177 observations and 38 variables
+- Wrangled SD crash data set: 47,806 observations and 37 variables
 
 ### Data Import
 ```{r, message = FALSE, warning = FALSE}
@@ -40,39 +39,46 @@ crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_up
 
 ### Data Wrangling
 
-#### Extract Year and Filter For California Accidents That Happened in 2021
+#### Filter For San Diego County
+- 
+```{r, eval = FALSE}
+crash <- crash |>
+  filter(County == "San Diego")
+```
+
+#### Extract Year, Month, and Day and Create Variables
 - 
 ```{r, eval = FALSE}
 crash$Year <- substr(crash$Start_Time, 1, 4)
-crash2021 <- crash[crash$Year == "2021", ]
-
-crashCA <- crash2021 |>
-  filter(State == "CA")
-```
-
-#### Extract Month and Day: Create Month and Day Variables
-- 
-```{r, eval = FALSE}
-crashCA$Month <- substr(crashCA$Start_Time, 6, 7)
 ```
 
 ```{r, eval = FALSE}
-crashCA$Day <- substr(crashCA$Start_Time, 9, 10)
+crash$Month <- substr(crash$Start_Time, 6, 7)
+```
+
+```{r, eval = FALSE}
+crash$Day <- substr(crash$Start_Time, 9, 10)
+```
+
+#### Create Date Variable
+-
+```{r, eval = FALSE}
+crash$Date <- dmy(paste(crash$Day, crash$Month, crash$Year, sep = "-"))
 ```
 
 #### Select Desired Variables and Arrange In An Order That Makes Sense
 - 
 ```{r, eval = FALSE}
-crashCA <- crashCA |>
-  select("ID", "Day", "Month", "Year", "Zipcode", "County", "City", "Street", "Severity", "Start_Lat", "Start_Lng", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
+crash <- crash |>
+  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Severity", "Start_Lat", "Start_Lng", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
 
-head(crashCA)
+head(crash)
 ```
 
 #### Rename Variables Containing Units & Change Variables to Only First Letter Capitalized 
 - 
 ```{r, eval = FALSE}
-crashCA <- crashCA |>
+crash <- crash |>
   rename(Latitude = "Start_Lat",
          Longitude = "Start_Lng",
          Distance = "Distance(mi)",
@@ -93,51 +99,39 @@ crashCA <- crashCA |>
          Time_of_day = "Sunrise_Sunset")
 ```
 
-#### Save and Load Wrangled Data Because of Memory in RStudio
-- 
 ```{r, eval = FALSE, echo = FALSE}
-save(crashCA, file = "wrangled_crashCA.rda")
+save(crash, file = "wrangled_crash.rda")
 ```
 
 ```{r, eval = FALSE, echo = FALSE}
-load("wrangled_crashCA.rda")
+load("wrangled_crash.rda")
 ```
 
-#### Arrange in Chronological Order and Change Variable Types
+#### Change Variable Types to Numerics
 - 
 ```{r, eval = FALSE}
-crashCA <- crashCA |>
-  arrange(Month, Day) |>
+crash <- crash |>
   mutate(Day = as.numeric(Day),
          Month = as.numeric(Month),
          Year = as.numeric(Year))
 ```
 
-#### Create Date Variable
--
-```{r, eval = FALSE}
-crashCA$Date <- dmy(paste(crashCA$Day, crashCA$Month, crashCA$Year, sep = "-"))
-```
-
-#### Create Function to Normalize Weather Condition Values
-- 56 unique values that need to be filtered and categorized
+#### Create Function to Normalize Weather Condition Values 
+- 56 unique weather condition values that need to be filtered and categorized
 - define each category and what it includes
 ```{r, eval = FALSE}
 categorize_weather <- function(weather_data) {
-  
   lookup <- tibble( # create look up table for referencing
-    Category = c("Fair", "Cloudy", "Stormy", "Windy", "Foggy", "Snowy", "Other"),
+    Category = c("Fair", "Cloudy", "Stormy", "Foggy", "Snowy", "Other"),
     Keyword = list(
-      c("fair"),
-      c("cloudy", "overcast", "partly cloudy", "mostly cloudy"),
+      c("fair", "clear"),
+      c("cloudy", "overcast", "partly cloudy", "mostly cloudy", "clouds"),
       c("rain", "storm", "hail", "thunder", "heavy rain", "light rain", "heavy rain", "precipitation", "rain shower", "showers", "drizzle"),
-      c("windy", "squalls"),
       c("fog", "mist", "haze"),
       c("snow", "ice", "heavy snow", "light snow", "wintry mix"),
-      c("smoke", "duststorm", "dust")
+      c("smoke", "duststorm", "dust", "ash")
     )
   )
-  
   match_weather <- function(x) { # create function to extract keywords and place in proper weather category
     if(is.na(x)) {
       return(NA)
@@ -151,9 +145,8 @@ categorize_weather <- function(weather_data) {
     }
     return(lookup$Category[length(lookup$Category)])
   }
-  
   weather_data <- weather_data |> # apply the match_weather function
-    mutate(Weather_category = sapply(Weather_condition, match_weather)) # create new variable(Weather_category) that takes in Weather_condition and applies function on its values
+    mutate(Weather_category = sapply(Weather_condition, match_weather)) # create new variable(Weather_category) using Weather_condition values
   
   return(weather_data)
 }
@@ -162,65 +155,93 @@ categorize_weather <- function(weather_data) {
 #### Apply the Function From Above
 - 
 ```{r, eval = FALSE}
-crashCA <- categorize_weather(crashCA)
-crashCA
+crash <- categorize_weather(crash)
+head(crash)
 ```
 
 #### Check Weather Category Counts
 - 
 ```{r, eval = FALSE}
-crashCA |>
+crash |>
   count(Weather_category) |>
   arrange(desc(n))
 ```
 
-#### Rearange Variables
+#### Rearange Variables into Our Desired Order
 - 
 ```{r, eval = FALSE}
-crashCA <- crashCA |>
-  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Street", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
+crash <- crash |>
+  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
-#### Filter For San Diego County
+#### Arrange in Chronological Order and Fix City Values
 - 
 ```{r, eval = FALSE}
-crashSD <- crashCA |>
-  filter(County == "San Diego")
+crash <- crash |>
+  arrange(Year, Month, Day) |>
+  mutate(City = case_when(City == "Cardiff By the Sea" ~ "Cardiff By The Sea", # two cases of Cardiff By The Sea(combine)
+         TRUE ~ City)) |>
+  filter(City != "San Clemente") # this city is from Orange County
 ```
 
 #### Save the Data
-- 
+- Here we save our finalized tibble that we will use for our EDA and analysis.
 ```{r, eval = FALSE}
-save(crashCA, crashSD, file = "wrangled_crashCA_crashSD.rda")
+save(crash, file = "final_wrangled_crash.rda")
 ```
 
 
 ## Analysis
 ```{r}
-load("wrangled_crashCA_crashSD.rda")
+load("final_wrangled_crash.rda")
 ```
+
 
 ### Exploratory Data Analysis
 
 ```{r}
-skim(crashCA)
+skim(crash)
 ```
 
 ```{r}
-skim(crashSD)
+ggplot(crash, aes(x = Year)) +
+  geom_bar()
+```
+
+```{r}
+ggplot(crash, aes(x = fct_infreq(Weather_category))) +
+  geom_bar()
+```
+
+```{r}
+ggplot(crash, aes(x = Month)) +
+  geom_bar()
+```
+
+```{r}
+ggplot(crash, aes(x = Day)) +
+  geom_bar()
+```
+
+```{r}
+crash |>
+  group_by(City) |>
+  summarise(n = n()) |>
+  ggplot(aes(y = City, x = n)) +
+  geom_col()
 ```
 
 
 ### Data Analysis
 
-#### Question 1: In 2021, is there a relationship between the severity of car accidents and weather conditions in California?
+#### Question 1: FILL QUESTION 1 IN HERE
 
 
 
 #### Q1: What's the answer?
 
 
-#### Question 2: In San Diego County, is there a relationship between severity of accidents and road infrastructure and conditions?
+#### Question 2: FILL QUESTION 2 IN HERE
 
 
 
