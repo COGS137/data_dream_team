@@ -122,7 +122,7 @@ crashCA$Date <- dmy(paste(crashCA$Day, crashCA$Month, crashCA$Year, sep = "-"))
 #### Create Function to Normalize Weather Condition Values
 - 56 unique values that need to be filtered and categorized
 - define each category and what it includes
-```{r}
+```{r, eval = FALSE}
 categorize_weather <- function(weather_data) {
   
   lookup <- tibble( # create look up table for referencing
@@ -161,14 +161,14 @@ categorize_weather <- function(weather_data) {
 
 #### Apply the Function From Above
 - 
-```{r}
+```{r, eval = FALSE}
 crashCA <- categorize_weather(crashCA)
 crashCA
 ```
 
 #### Check Weather Category Counts
 - 
-```{r}
+```{r, eval = FALSE}
 crashCA |>
   count(Weather_category) |>
   arrange(desc(n))
@@ -192,10 +192,6 @@ crashSD <- crashCA |>
 - 
 ```{r, eval = FALSE}
 save(crashCA, crashSD, file = "wrangled_crashCA_crashSD.rda")
-```
-
-```{r}
-crashCA
 ```
 
 
