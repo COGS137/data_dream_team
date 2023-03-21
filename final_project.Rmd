@@ -30,7 +30,7 @@ library(lubridate)
 - TALK ABOUT THE DATA HERE
 - Explain variables(both ones we ended up using and not using)
 - Original data set: 2,845,342 observations and 47 variables
-- Wrangled SD crash data set: 47,806 observations and 37 variables
+- Wrangled SD crash data set: 47,806 observations and 39 variables
 
 ### Data Import
 ```{r, message = FALSE, warning = FALSE}
@@ -167,13 +167,6 @@ crash |>
   arrange(desc(n))
 ```
 
-#### Rearange Variables into Our Desired Order
-- 
-```{r, eval = FALSE}
-crash <- crash |>
-  select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
-```
-
 #### Arrange in Chronological Order and Fix City Values
 - 
 ```{r, eval = FALSE}
@@ -182,6 +175,34 @@ crash <- crash |>
   mutate(City = case_when(City == "Cardiff By the Sea" ~ "Cardiff By The Sea", # two cases of Cardiff By The Sea(combine)
          TRUE ~ City)) |>
   filter(City != "San Clemente") # this city is from Orange County
+```
+
+#### Create Daily Accident Total
+- 
+```{r}
+crash <- crash |>
+  group_by(Day, Month, Year) |>
+  mutate(Daily_total = n()) |>
+  ungroup()
+```
+
+#### Create Season Variable
+- 
+```{r}
+crash <- crash |>
+  mutate(Season = case_when(
+    Month %in% c(12, 1, 2) ~ "Winter",
+    Month %in% c(3, 4, 5) ~ "Spring",
+    Month %in% c(6, 7, 8) ~ "Summer",
+    Month %in% c(9, 10, 11) ~ "Fall"
+  ))
+```
+
+#### Rearange Variables into Our Desired Order
+- 
+```{r, eval = FALSE}
+crash <- crash |>
+  select("ID", "Day", "Month", "Year", "Date", "Season", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Daily_total", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
 #### Save the Data
