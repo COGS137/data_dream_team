@@ -1,5 +1,3 @@
-## COGS 137 Final Project
-
 ***San Diego County 2021 Automobile Accidents***
 
 **Questions Answered**:
