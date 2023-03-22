@@ -9,7 +9,9 @@ output:
 ---
 
 ## Introduction
-- INTRODUCTION HERE
+
+Based on the most recent projections by the National Highway Traffic Safety Administration, a staggering 31,785 individuals lost their lives in traffic crashes during the first nine months of 2022. Shockingly, roughly one in every ten of these fatalities occurred in California. As UCSD students, we are frequently driving around the city and are thus both curious and concerned about the factors contributing to these accidents. With recent weather patterns growing increasingly unpredictable, we are eager to investigate whether there exists a correlation between weather and the frequency of accidents. Our study aims to explore this potential relationship between weather conditions, seasons, and the daily frequency of accidents in San Diego. By carefully analyzing traffic data, we hope to uncover whether weather and seasonal changes hold a significant impact on the frequency of accidents in our area. Ultimately, our goal is to provide insights that may aid in improving road safety and reducing the number of accidents in “America’s Finest City”.
+
 
 ### Load packages
 ```{r load-packages, message=FALSE}
@@ -26,28 +28,40 @@ library(lubridate)
 
 **2. How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?**
 
-## The Data
-- TALK ABOUT THE DATA HERE
-- Explain variables(both ones we ended up using and not using)
-- Original data set: 2,845,342 observations and 47 variables
-- Wrangled SD crash data set: 23,915 observations and 39 variables
+
+## Dataset Description
+
+We used a dataset that we found on Kaggle that contained United States automobile accidents from 2016-2021. Originally, this dataset contained 2,845,342 observations accompanied by 47 descriptor variables. Each row or observation represented a single accident, so that meant there were approximately 2.8 million accidents within the data. These variables included descriptors ranging from location of the accident, various weather conditions, accident severity, road infrastructure, as well as street, zip code, and county of the observed accident. To start, this data was in a relatively tidy format, but upon further examination, we realized that significant wrangling would have to be performed. 
+
+Since we wanted to analyze San Diego County Accidents that occurred in 2021, we decided to dramatically pare down the data and focus our analysis on this subset. In our wrangling process, we kept, changed, and removed many of the different variables that were originally present based on our needs for answering our proposed questions. When we filtered our dataset to only include observations of San Diego county, we found that San Clemente(city in Orange County) was included as one of our cities containing accidents. We removed these observations and continued on with our wrangling. Our key variables of interest include day of the crash, month of the crash, season of the crash, the total crashes on each respective day, and weather conditions such as Temperature(F), Precipitation(in), Humidity(%), Pressure(in), and wind conditions. Since the dataset did not contain a useful variable that described the date of the accident, we had to manually extract day, month, year, and date from the original "Start_Time" variable. Additionally, there was no season descriptor, so after finding our dates, we assigned each observation a season variable based on the date of the accident. Next, we created a count of the daily total number of accidents on a given day. We should note that the original variable called "Weather_Conditions" was far from consistent and actually contained 56 unique weather condition values. As a result, this variable took significant wrangling to normalize and further group into categories that we felt best fit. 
+
+All together, our finalized and wrangled dataset included 23,915 accidents from San Diego County in 2021 and these accidents each included 39 descriptor variables. 
+
 
 ### Data Import
+
+Here, we import our CSV file from Kaggle. This CSV file is enormous and is roughly 1.1 GB in size. We should note that we had some trouble getting the file to properly load and were experiencing constant RStudio crashes, so this prompted us to save the partially wrangled data as an rda file earlier than we expected. But, for the sake of fluidity, we have used echo=FALSE to remove these code chunks from our final Rmd. 
+
 ```{r, message = FALSE, warning = FALSE}
 crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_updated.csv")
 ```
 
+
 ### Data Wrangling
 
-#### Filter For San Diego County
-- 
+#### Filter For San Diego County and 2021
+
+First, we started off by filtering for San Diego County and crashes that happened in 2021. We will be saving our wrangled dataset by the name of "crash". 
+
 ```{r, eval = FALSE}
 crash <- crash |>
-  filter(County == "San Diego")
+  filter(County == "San Diego", Year == 2021)
 ```
 
 #### Extract Year, Month, and Day and Create Variables
-- 
+
+Next, using the "Start_Time" character variable from the data, we extracted the Year, Month, and Day variables by string extraction. The original variable stored the observation's information in a "YYYY-MM-DD HH:MM:SS" format. We used the substring method to extract each of our desired values. 
+
 ```{r, eval = FALSE}
 crash$Year <- substr(crash$Start_Time, 1, 4)
 ```
@@ -61,29 +75,26 @@ crash$Day <- substr(crash$Start_Time, 9, 10)
 ```
 
 #### Create Date Variable
--
+
+Using the Lubridate package, we used our Day, Month, and Year variables that we found above to create a date variable containing the Date in a "YYYY-MM-DD" format. Effectively, this retrieves the day, month, and year of an observation and pastes them together as a character variable. From there, it is converted into a date object using the Lubridate "dmy" call. 
+
 ```{r, eval = FALSE}
 crash$Date <- dmy(paste(crash$Day, crash$Month, crash$Year, sep = "-"))
 ```
 
-#### Filter for 2021
--
-```{r}
-crash <- crash |>
-  filter(Year == 2021)
-```
-
 #### Select Desired Variables and Arrange In An Order That Makes Sense
-- 
+
+In an attempt to pare down our variables more and arrange them in an orderly fashion, we manually used a select call. This lengthy manual process allowed us to get rid of the variables we felt weren't as helpful, while also changing the variable order to one that made the most sense to us. 
+
 ```{r, eval = FALSE}
 crash <- crash |>
   select("ID", "Day", "Month", "Year", "Date", "Zipcode", "County", "City", "Severity", "Start_Lat", "Start_Lng", "Distance(mi)", "Side", "Sunrise_Sunset", "Temperature(F)", "Wind_Chill(F)", "Humidity(%)", "Pressure(in)", "Visibility(mi)", "Wind_Direction", "Wind_Speed(mph)", "Precipitation(in)", "Weather_Condition", "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming", "Traffic_Signal", "Turning_Loop")
-
-head(crash)
 ```
 
 #### Rename Variables Containing Units & Change Variables to Only First Letter Capitalized 
-- 
+
+After observing that some weather condition variables included units in their names, we decided to rename the variables that we kept from the original dataset. We removed the units and kept the variable names in a consistent format. Our consistent format entailed capitalization of only the first letter of each variable. Also, the original variable "Sunrise_Sunset" was not representative of the values it held (day/night), so we changed its name to Time_of_day.
+
 ```{r, eval = FALSE}
 crash <- crash |>
   rename(Latitude = "Start_Lat",
@@ -115,7 +126,9 @@ load("wrangled_crash.rda")
 ```
 
 #### Change Variable Types to Numerics
-- 
+
+Due to our character extraction from above, our Day, Month, and Year variables were all stored in a character format. We changed these values to a numeric type because this will help when it comes time to plot and further analyze the data over time. 
+
 ```{r, eval = FALSE}
 crash <- crash |>
   mutate(Day = as.numeric(Day),
@@ -126,6 +139,9 @@ crash <- crash |>
 #### Create Function to Normalize Weather Condition Values 
 - 56 unique weather condition values that need to be filtered and categorized
 - define each category and what it includes
+
+Upon further examination of the original "Weather_Condition" values, we observed 56 unique weather values. The values ranged from volcanic ash, wintry mix, mostly cloudy, dust storm, to thunder storms. This posed a problem for our second question, because without consistent weather values, we believed that we may not be able to make conclusive decisions about the relationship between accident frequencies and weather conditions. To make this variable useful, in the context of our analysis, we took a thorough look at each and every unique value and then determined groupings of "Weather_categories" that would best fit each value. To start, we made a lookup table with our desired categories and keywords that would serve as our values to be checked. 
+
 ```{r, eval = FALSE}
 categorize_weather <- function(weather_data) {
   lookup <- tibble( # create look up table for referencing
@@ -163,7 +179,6 @@ categorize_weather <- function(weather_data) {
 - 
 ```{r, eval = FALSE}
 crash <- categorize_weather(crash)
-head(crash)
 ```
 
 #### Check Weather Category Counts
@@ -227,47 +242,244 @@ load("final_wrangled_crash.rda")
 
 ### Exploratory Data Analysis
 
+In this section, we will perform exploratory data analysis to gain insights into our research questions. We will use data visualization techniques to identify patterns, trends, and relationships in the dataset. Our research question focuses on identifying the day and month with the highest number of accidents in San Diego County in 2021. To achieve this, we will create histograms and analyze trends to better understand the data. Additionally, we will investigate the relationship between the season, weather, and the number of accidents by examining the trend of weather and the number of accidents. This will help us to select an appropriate statistical model for analyzing the relationship. Overall, our aim is to thoroughly examine the data and identify relevant variables that can help answer our research question.
+
+#### EDA: Understanding the Dataset
+
+Before we begin to explore visualizations, we will first look at which variables could best answer our questions.
+
+Here is the skim of our data that summarizes all variables across dataset.
+
 ```{r}
 skim(crash)
 ```
 
-```{r}
-ggplot(crash, aes(x = Year)) +
-  geom_bar()
-```
+From the skimmed data, we see that the `Day`, `Month`, `Year`, and `Daily_total` does not miss any values, which tells us that every accidents are logged in the dataset. Also we see that the average `Daily_total` is around 93 accidents per day which is very surprising. We see that we have weather conditions available to compare if these weather conditions affect the number of accidents. Additionally, the road conditions are available as well and maybe we could dive deeper to see if it relates to Accidents as well.
+
+#### EDA: Daily and Monthly Accidents in 2021, San Diego
+
+Now lets explore visualization for daily and monthly accidents in San Diego, 2021. Since we would like to know the daily distribution of accidents in each month, we will generate a histogram of number of accidents in each day for every month.
 
 ```{r}
-ggplot(crash, aes(x = fct_infreq(Weather_category))) +
-  geom_bar()
+month_names <- month.abb
+crash_A <- crash
+crash_A$Month <- factor(crash_A$Month, levels = 1:12, labels = month_names)
+ggplot(crash_A, aes(x=Day, y=Daily_total)) +
+  geom_line() +
+  labs(title = "Distribution of number of accidents accross months 2021, San Diego County",
+       subtitle = "More accidents occured at the end of the year",
+       y = "Number of Accidents") +
+  theme_minimal()+
+  theme(plot.title.position = "plot",
+        plot.title = element_text(size=14),
+        plot.subtitle  = element_text(size=12))+
+  facet_wrap(~Month)
+  
 ```
 
-```{r}
-ggplot(crash, aes(x = Month)) +
-  geom_bar()
-```
+The above plot illustrates the distribution of accidents per day across each month, revealing that December has a notably higher number of accidents. This observation could be attributed to the holiday season and end-of-year holidays, during which people tend to travel frequently and may be more likely to experience road accidents in San Diego. 
+
+The distribution across April~July seems steady and maybe because its middle of the year where people tend to travel less frequent.
+
+#### EDA: Looking Closely at the Daily Average
+
+While we have observed the accident trends across each month, we are now interested in identifying the day of the month with the highest average number of accidents. Although this may be subject to random variation, it is still worth investigating, as it could potentially have a relationship with other variables. Identifying such a trend would further enhance our understanding of the factors that contribute to accidents in San Diego County.
 
 ```{r}
-ggplot(crash, aes(x = Day)) +
-  geom_bar()
+crash_A |>
+  group_by(Day) |>
+  summarize(Daily_mean = mean(Daily_total)) |>
+  arrange(desc(Daily_mean)) |>
+  ggplot(aes(y = Daily_mean, x = reorder(Day, -Daily_mean))) +
+  geom_bar(stat = "identity") +
+  labs(title = "December 14th had the most accident in 2021 across days, San Diego County",
+       x = "Day") +
+  theme_minimal() +
+  theme(axis.title.y = element_blank(),
+        plot.title.position = "plot")
 ```
+
+The visualization indicates that the 14th day of the month has the highest number of accidents, with approximately 200 accidents per day on average. While this average provides valuable insight, it is important to note that other factors such as weather conditions, temperature, and road conditions could contribute to this trend. Thus, it is possible that these factors may have coincidentally aligned to result in a higher number of accidents on the 14th day of the month.
+
+#### EDA: Which Time During the Day had More Accidents Across 2021
+
+Additionally, we aim to investigate the distribution of accident time across 2021. By analyzing the time of the day distribution, we can gain further insights into the relationship between accident severity and the factors that may have influenced it.
 
 ```{r}
 crash |>
-  group_by(City) |>
-  summarise(n = n()) |>
-  ggplot(aes(y = City, x = n)) +
-  geom_col()
+  group_by(Time_of_day) |>
+  count()
+```
+
+The table displays the time of the day accidents in San Diego County in 2021. The majority of these accidents occurred during the day, likely due to frequent commuting and movement between places during daytime hours compared to nighttime.
+
+#### Distribution of Weather Conditions
+
+In order to help us answer the question of how does season and weather categories have any relationship with the frequency of accidents on a given day in 2021, and what is this relationship between them, we must first start off with visualizing the distribution of weather categories during the year 2021. By doing so we can see what was the least and most frequent weather categories which will help us understand it in the its correlation to total daily accidents.
+
+```{r}
+ggplot(crash, mapping =  aes(y = fct_infreq(Weather_category))) +
+  geom_bar(fill = "blue") +
+  labs(title = "Distribution of Weather Conditions",
+       x = "Count",
+       y = "Weather Condition") +
+  theme(plot.title.position = "plot") +
+  theme_minimal()
+```
+
+#### Weather Conditions Broken Down by Seasons
+
+It is important as well to observe the relationship between seasons and weather categories as well in order to understand if these two variables might have any worthwhile correlation with total daily accidents. We notice that Fair and Cloudy are among the most prevalent of weather conditions regardless of the season.
+
+```{r}
+ggplot(crash, mapping = aes(x = Season, fill = Weather_category)) + 
+  geom_bar(position = "stack") +
+  labs(title = "Relationship between Seasons and Weather Conditions", 
+       x = "Season", y = "Count", fill = "Weather Conditions") +
+  theme(plot.title.position = "plot") +
+  theme_minimal()
+```
+
+#### Daily Total Accidents Broken Down By Weather Conditions
+
+After the aforementioned visualizations has taken place, we then move on to observing the relationship between the number of total daily accidents with weather categories, noticing that fair is the outlier when it comes to accidents broken down by weather category.
+
+```{r}
+ggplot(crash, mapping = aes(x = Daily_total, y = fct_infreq(Weather_category))) +
+  geom_bar(stat = "summary", fun = "sum", fill = "darkgreen") +
+  labs(title = "Number of Accidents by Weather Condition",
+       y = "Weather Condition",
+       x = "Number of Accidents") +
+  theme(plot.title.position = "plot") +
+  theme_minimal()
+```
+
+#### Distribution of Accidents by Season
+
+In the same vein we also check the relationship between seasons and observe that Winter and Fall are the seasons in which the most amount of accidents occur.
+
+```{r}
+ggplot(crash, mapping = aes(x = Daily_total, y = fct_infreq(Season))) + 
+  geom_bar(stat = "identity", fill = "steelblue") +
+   labs(title = "Distribution of accidents by season",
+       y = "Season",
+       x = "Number of Accidents") +
+  theme_minimal()
+```
+
+#### ScatterPlot for Total Daily Accidents by Season And Date in 2021
+
+Finally, we create a scatterplot where we observe total daily accidents by date and season, again recognizing that winter and fall have the greatest peaks in total daily accidents. This causes us to wonder what these peaks may be correlated with, perhaps there is more travel during these seasons, or maybe weather conditions play a role. 
+
+```{r}
+ggplot(crash, mapping = aes(x = Date, y = Daily_total, color = Season)) +
+  geom_point() +
+  scale_color_manual(values = c("blue", "green", "orange", "purple"), 
+                     labels = c("Fall", "Spring", "Summer", "Winter")) +
+  labs(x = "Date", y = "Total Accidents", title = "Accidents by Date and Season", 
+       color = "Season") +
+  theme(legend.position = "bottom",
+        plot.title.position = "plot") +
+  theme_minimal()
 ```
 
 
 ### Data Analysis
 
+In this section, we will delve deeper into the data we have collected through our Exploratory Analysis and run statistical analysis to gain more insights. Our main objective is to identify patterns and relationships within the data and draw meaningful conclusions. We will begin by calculating and analyzing which days and months had the highest number of accidents, and determine if there are any significant trends or patterns in this regard. 
+
+Furthermore, we will explore any possible relationships between the number of accidents and weather conditions, such as rainfall, temperature, and visibility. We will also examine how the season may affect accident rates and identify any notable trends. By doing so, we aim to provide a comprehensive and insightful analysis that sheds light on the factors that contribute to accidents in San Diego County.
+
+
 #### Question 1: Based on the 2021 accident records in San Diego County, which day and month have the most accidents?
 
+To determine the day and month with the highest number of accidents, we will first identify the date on which the greatest number of accidents occurred. This will involve analyzing the number of accidents on different dates, such as March 3rd and December 31st, and comparing them to find the date with the most accidents. Once we have identified the date, we can then proceed to examine the frequency of accidents on that date across different months, to determine which month had the most accidents overall.
 
+```{r}
+num_acc <- crash |>
+  group_by(Date) |>
+  reframe(num_of_accident = Daily_total) |>
+  arrange(desc(num_of_accident))
+num_acc <- num_acc[!duplicated(num_acc[c("Date", "num_of_accident")]), ]
+num_acc <- head(num_acc, n=20)
+num_acc$Date<- as.factor(num_acc$Date)
+num_acc |>
+  ggplot(aes(y = reorder(Date, num_of_accident), x = num_of_accident, fill = num_of_accident)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "beige", high = "blue") +
+  labs(title = "December 14th had the most accident in 2021, San Diego County",
+       subtitle = "List of top 20 dates across 2021",
+       x = "Number of Accidents") +
+  theme_minimal() +
+  theme(axis.title.y = element_blank(),
+        plot.title.position = "plot",
+        legend.position = "none") +
+  geom_text(
+    aes(label = num_of_accident),
+    position = position_dodge(width = 0.7),
+    size = 3,
+    color = "Black"
+  )
+```
+
+To determine the month with the highest number of accidents, we will calculate the sum of all accidents that occurred each month. By doing so, we can analyze the frequency of accidents across different months and identify the month with the highest number of accidents.
+
+```{r}
+num_acc_mon <- crash_A |>
+  group_by(Month) |>
+  reframe(num_of_accident = Daily_total) 
+num_acc_mon <- num_acc_mon[!duplicated(num_acc_mon[c("Month", "num_of_accident")]), ]
+num_acc_mon |>
+  group_by(Month) |>
+  summarize(monthly_acc = sum(num_of_accident)) |>
+  ggplot(aes(y = reorder(Month, monthly_acc), x = monthly_acc, fill=monthly_acc)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "beige", high = "red")+
+  labs(title = "December has the most accident in 2021, San Diego County",
+       x = "Number of Accidents") +
+  theme_minimal() +
+  theme(axis.title.y = element_blank(),
+        plot.title.position = "plot",
+        legend.position = "none") +
+  geom_text(
+    aes(label = monthly_acc),
+    position = position_dodge(width = 0.7),
+    size = 3,
+    color = "Black"
+  )
+  
+```
+
+```{r}
+num_acc_mon <- crash_A |>
+  group_by(Month) |>
+  reframe(num_of_accident = Daily_total) 
+num_acc_mon <- num_acc_mon[!duplicated(num_acc_mon[c("Month", "num_of_accident")]), ]
+num_acc_mon |>
+  group_by(Month) |>
+  summarize(monthly_acc = mean(num_of_accident)) |>
+  ggplot(aes(y = reorder(Month, monthly_acc), x = monthly_acc, fill = monthly_acc)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "beige", high = "Dark Green") +
+  labs(title = "December has the most average number of accident in 2021, San Diego County",
+       x = "Number of Accidents") +
+  theme_minimal() +
+  theme(axis.title.y = element_blank(),
+        plot.title.position = "plot",
+        legend.position = "none") +
+  geom_text(
+    aes(label = sprintf("%.2f", monthly_acc)),
+    position = position_dodge(width = 0.7),
+    size = 3,
+    color = "Black"
+  )
+```
 
 #### Q1: What's the answer?
 
+The first graph provides a visual representation of the top 20 dates with the highest number of accidents that occurred in San Diego County during the year 2021. From the graph, it is evident that December 14th, 2021 had the highest number of accidents, providing a clear answer to our question. December 14th had 379 accidents which is very surprising.
+
+"The second and third graphs display the total and average number of accidents per month, respectively. Both graphs consistently show that December had the highest number of accidents. This finding is in line with the trends observed in the Exploratory Analysis section, which revealed a peak in the number of accidents in December. To further support this conclusion, we calculated the total and average number of accidents per month and arrived at the same result. Therefore, we can confidently state that December had the most accidents in 2021 in San Diego county.
 
 #### Question 2: How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?
 
