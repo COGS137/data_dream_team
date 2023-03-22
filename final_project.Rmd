@@ -30,7 +30,7 @@ library(lubridate)
 - TALK ABOUT THE DATA HERE
 - Explain variables(both ones we ended up using and not using)
 - Original data set: 2,845,342 observations and 47 variables
-- Wrangled SD crash data set: 47,806 observations and 39 variables
+- Wrangled SD crash data set: 23,915 observations and 39 variables
 
 ### Data Import
 ```{r, message = FALSE, warning = FALSE}
@@ -64,6 +64,13 @@ crash$Day <- substr(crash$Start_Time, 9, 10)
 -
 ```{r, eval = FALSE}
 crash$Date <- dmy(paste(crash$Day, crash$Month, crash$Year, sep = "-"))
+```
+
+#### Filter for 2021
+-
+```{r}
+crash <- crash |>
+  filter(Year == 2021)
 ```
 
 #### Select Desired Variables and Arrange In An Order That Makes Sense
