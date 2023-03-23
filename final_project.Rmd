@@ -37,7 +37,7 @@ We used a dataset that we found on Kaggle that contained United States automobil
 
 Since we wanted to analyze San Diego County Accidents that occurred in 2021, we decided to dramatically pare down the data and focus our analysis on this subset. In our wrangling process, we kept, changed, and removed many of the different variables that were originally present based on our needs for answering our proposed questions. When we filtered our dataset to only include observations of San Diego county, we found that San Clemente(city in Orange County) was included as one of our cities containing accidents. We removed these observations and continued on with our wrangling. Our key variables of interest include day of the crash, month of the crash, season of the crash, the total crashes on each respective day, and weather conditions such as Temperature(F), Precipitation(in), Humidity(%), Pressure(in), and wind conditions. Since the dataset did not contain a useful variable that described the date of the accident, we had to manually extract day, month, year, and date from the original "Start_Time" variable. Additionally, there was no season descriptor, so after finding our dates, we assigned each observation a season variable based on the date of the accident. Next, we created a count of the daily total number of accidents on a given day. We should note that the original variable called "Weather_Conditions" was far from consistent and actually contained 56 unique weather condition values. As a result, this variable took significant wrangling to normalize and further group into categories that we felt best fit. 
 
-All together, our finalized and wrangled dataset included 23,915 accidents from San Diego County in 2021 and these accidents each included 39 descriptor variables. 
+All together, our finalized and wrangled dataset included 23,915 accidents from San Diego County in 2021 and these accidents each included 38 descriptor variables. 
 
 
 ### Data Import
@@ -50,6 +50,15 @@ crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_up
 
 
 ### Data Wrangling
+
+#### Filter For San Diego County
+
+First, we started off by filtering for crashes that happened in San Diego County. We will be saving our wrangled dataset by the name of "crash".
+
+```{r, eval = FALSE}
+crash <- crash |>
+  filter(County == "San Diego")
+```
 
 #### Extract Year, Month, and Day and Create Variables
 
@@ -67,13 +76,13 @@ crash$Month <- substr(crash$Start_Time, 6, 7)
 crash$Day <- substr(crash$Start_Time, 9, 10)
 ```
 
-#### Filter For San Diego County and 2021
+#### Filter for 2021
 
-First, we started off by filtering for San Diego County and crashes that happened in 2021. We will be saving our wrangled dataset by the name of "crash". 
+Next, we filter for crashes that happened in 2021. 
 
 ```{r, eval = FALSE}
 crash <- crash |>
-  filter(County == "San Diego", Year == 2021)
+  filter(Year == 2021)
 ```
 
 #### Create Date Variable
@@ -139,10 +148,8 @@ crash <- crash |>
 ```
 
 #### Create Function to Normalize Weather Condition Values 
-- 56 unique weather condition values that need to be filtered and categorized
-- define each category and what it includes
 
-Upon further examination of the original "Weather_Condition" values, we observed 56 unique weather values. The values ranged from volcanic ash, wintry mix, mostly cloudy, dust storm, to thunder storms. This posed a problem for our second question, because without consistent weather values, we believed that we may not be able to make conclusive decisions about the relationship between accident frequencies and weather conditions. To make this variable useful, in the context of our analysis, we took a thorough look at each and every unique value and then determined groupings of "Weather_categories" that would best fit each value. To start, we made a lookup table with our desired categories and keywords that would serve as our values to be checked. 
+Upon further examination of the original "Weather_Condition" values, we observed 56 unique weather values. The values ranged from volcanic ash, wintry mix, mostly cloudy, dust storm, to thunder storms. This posed a problem for our second question, because without consistent weather values, we believed that we may not be able to make conclusive decisions about the relationship between accident frequencies and weather conditions. To make this variable useful, in the context of our analysis, we took a thorough look at each and every unique value and then determined groupings of "Weather_categories" that would best fit each value. We wrote a function called categorize_weather that takes in a tibble or data frame called weather_data as its input. From there the overall function of the code is to cetegorize the input and group them into one of six categories: Fair, Cloudy, Stormy, Foggy, Snowy, or Other. Within the code, we started by making a lookup table with our desired categories and keywords that would serve as our values to be checked for. Next, we wrote a function to iterate through and determine if the value was NA or not. Then if it wasn't NA, then we searched for the keywords. From there, if the keyword was detected, we would set the value to the category. We then mutated our outputted tibble to specifically use weather condition to create the new variable called weather category. We strategically came up with as many possible keywords in order to properly and efficiently match the weather conditions into their respective weather categories. Going forward we will only be using weather_category. 
 
 ```{r, eval = FALSE}
 categorize_weather <- function(weather_data) {
@@ -158,19 +165,26 @@ categorize_weather <- function(weather_data) {
     )
   )
   match_weather <- function(x) { # create function to extract keywords and place in proper weather category
+    
     if(is.na(x)) {
       return(NA)
     }
+    
     x <- tolower(x)
+    
     for (i in 1:length(lookup$Category)) {
+      
       pattern <- paste0(lookup$Keyword[[i]], collapse = "|")
+      
       if(any(str_detect(x, pattern))) {
         return(lookup$Category[i])
       }
+      
     }
     return(lookup$Category[length(lookup$Category)])
   }
   weather_data <- weather_data |> # apply the match_weather function
+    
     mutate(Weather_category = sapply(Weather_condition, match_weather)) # create new variable(Weather_category) using Weather_condition values
   
   return(weather_data)
@@ -178,13 +192,17 @@ categorize_weather <- function(weather_data) {
 ```
 
 #### Apply the Function From Above
-- 
+
+Here we apply the categorize_weather function to our crash dataset. This changes our Weather_condition values to Weather_category values such as Fair, Cloudy, Stormy, Foggy, Snowy or Other.
+
 ```{r, eval = FALSE}
 crash <- categorize_weather(crash)
 ```
 
 #### Check Weather Category Counts
-- 
+
+Just for a sanity check, we decided to take a look at the updated Weather_category counts, and we organized them in descending order. These results would make sense for sunny Southern California, and especially for San Diego. A large majority of the days containing accidents happened on fair or clear days. 
+
 ```{r, eval = FALSE}
 crash |>
   count(Weather_category) |>
@@ -226,7 +244,7 @@ crash <- crash |>
 - 
 ```{r, eval = FALSE}
 crash <- crash |>
-  select("ID", "Day", "Month", "Year", "Date", "Season", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Daily_total", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_condition", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
+  select("ID", "Day", "Month", "Year", "Date", "Season", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Daily_total", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
 #### Save the Data
@@ -237,6 +255,7 @@ save(crash, file = "final_wrangled_crash.rda")
 
 
 ## Analysis
+
 ```{r}
 load("final_wrangled_crash.rda")
 ```
