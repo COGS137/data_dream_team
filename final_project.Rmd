@@ -515,7 +515,7 @@ num_acc_mon |>
   ggplot(aes(y = reorder(Month, monthly_acc), x = monthly_acc, fill = monthly_acc)) +
   geom_bar(stat = "identity") +
   scale_fill_gradient(low = "beige", high = "Dark Green") +
-  labs(title = "December has the Most Average Number of Accidents in 2021, San Diego County",
+  labs(title = "December has the Highest Average Number of Daily Accidents in 2021, San Diego County",
        x = "Number of Accidents") +
   theme_minimal() +
   theme(axis.title.y = element_blank(),
@@ -557,38 +557,25 @@ ggplot(top_dates, aes(x = Date, y = Daily_total)) +
 ```
 
 ```{r}
-top_20_dates <- head(df$Date, 20)
-crash_filtered <- crash %>% filter(Date %in% top_20_dates)
-
-crash_relationships <- lm(Daily_total ~ Weather_category + Precipitation + Visibility + Pressure + Humidity + Wind_chill + Temperature + Season, data = crash_filtered)
+# create our linear model
+crash_relationships <- lm(Daily_total ~ Weather_category + Precipitation + Visibility + Pressure + Humidity + Wind_chill + Temperature + Season, data = crash)
 
 summary(crash_relationships)
-```
-
-To evaluate the effectiveness of our model in predicting the variability in daily total accidents, we will use a backward selection approach. The goal of this approach is to identify the most significant predictors in the model and eliminate any non-significant predictors. 
-
-After applying this method and comparing the resulting R-squared value with the original model, we found that the highest R-squared value was similar to the one obtained from our original model. Therefore, we will continue to use the original model in our analysis.
-
-```{r}
-back_ward <- ols_step_all_possible(crash_relationships) |>
-  arrange(desc(adjr))
-head(back_ward)
 ```
 
 #### Analysis: Q2 - What's the answer?
 
 From the model, we can conclude that the season and weather conditions that impact the frequency of accidents on a given day in 2021 are the winter season and fair weather, and the relationship between the season and weather conditions is jointly significant. Below is a piece-by-piece analysis of the model.
 
-The "Foggy" and "Stormy" categories in the “Weather_category” variable have negative coefficients, indicating that crashes are less likely to occur in these weather conditions compared to the "Fair" weather condition. This was an interesting result - that car accidents are more likely to occur in fair weather. This could be attributed to the fact that drivers are generally more cautious in riskier weather, and could potentially be looked into in a further extension of this study.
+The "Foggy" and "Fair" Weather_category variables have negative coefficients, indicating that crashes are less likely to occur in these weather conditions compared to the "Cloudy" weather condition. This was an interesting result - that car accidents are more likely to occur in foggy weather. This could be attributed to the fact that drivers are generally more cautious in riskier weather, and could potentially be looked into in a further extension of this study.
 
-The coefficients for the continuous variables indicate the change in "Daily_total" for a one-unit increase in each predictor variable, holding all other variables constant. For example, a one-unit increase in "Precipitation" is associated with an increase of 225.92837 in "Daily_total".
-For seasons, "Winter" as the reference category and coefficient for "Spring" is negative, indicating that crashes are less likely to occur in spring compared to winter. This aligns with the plots we have done in Question 1 and our EDAs.
+The coefficients for the continuous variables indicate the change in "Daily_total" for a one-unit increase in each predictor variable, holding all other variables constant. For example, a one-unit increase in "Precipitation" is associated with an increase of 402.25 in "Daily_total". For seasons, "Fall" as the reference category and coefficient for "Spring" is negative, indicating that crashes are less likely to occur in spring compared to Fall. This aligns with the plots we have done in Question 1 and our EDA.
 
 The R-squared value indicates that the model explains about 43% of the variance in the response variable, and the Adjusted R-squared is slightly lower, taking into account the number of predictor variables.
 
-The multiple R-squared value is 0.4328, which means that about 43% of the variability in the daily total can be explained by the independent variables included in the model.
+The multiple R-squared value is 0.4331, which means that about 43% of the variability in the daily total can be explained by the independent variables included in the model.
 
-The F-statistic measures the overall significance of the model, i.e., whether the independent variables as a group are significantly related to the dependent variable. The F-statistic value is 246.5, which is significant (p-value < 2.2e-16), indicating that the independent variables included in the model are jointly significant in explaining the variation in the daily total.
+The F-statistic measures the overall significance of the model, i.e., whether the independent variables as a group are significantly related to the dependent variable. The F-statistic value is 1459, which is significant (p-value < 2.2e-16), indicating that the independent variables included in the model are jointly significant in explaining the variation in the daily total.
 
 
 ### Results
@@ -598,4 +585,6 @@ After conducting an in-depth analysis of our first question regarding the day an
 Our results also indicate that there is a positive correlation between the season and weather categories and the frequency of accidents on a given day in 2021. Winter and Fall, which had the greatest differences in weather category, particularly with respect to stormy and cloudy, yielded higher peaks in total daily accidents compared to other seasons like Spring or Summer. This indicates that when it rains or is overcast (especially during Winter & Fall), drivers should be more cautious since this could lead to an increase in accident rates. Additionally, even though fair was found to have an over representation of total daily accidents due to San Diego not having highly varying climate patterns throughout the year; we did still find evidence for a relationship between inclement weather conditions such as those aforementioned correlating with greater numbers of accident incidents on any given day during 2021.
 
 ## Conclusion
+
+Through looking at the frequency of accidents at a monthly and seasonal basis, we cannot mathematically state that driving in fair weather in December will lead to an accident in any city in the US. However, while looking at visual plots and our linear regression model in San Diego for the year 2021, we can see that there is a significant increase in accidents during the winter seasons - particularly for the month of December. In terms of weather conditions, we’ve found that accidents generally happen in fair weather, but there is still a significant number of dates with a high count of total daily accidents that occur in stormy or foggy weather as well. In conclusion, there is an increasing trend of accidents as we taper towards the end of the year and approach the Fall and Winter seasons, and especially peak holiday season in December.
 
