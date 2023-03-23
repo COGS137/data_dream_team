@@ -10,7 +10,9 @@ output:
 
 ## Introduction
 
-Based on the most recent projections by the National Highway Traffic Safety Administration, a staggering 31,785 individuals lost their lives in traffic crashes during the first nine months of 2022. Shockingly, roughly one in every ten of these fatalities occurred in California. As UCSD students, we are frequently driving around the city and are thus both curious and concerned about the factors contributing to these accidents. With recent weather patterns growing increasingly unpredictable, we are eager to investigate whether there exists a correlation between weather and the frequency of accidents. Our study aims to explore this potential relationship between weather conditions, seasons, and the daily frequency of accidents in San Diego. By carefully analyzing traffic data, we hope to uncover whether weather and seasonal changes hold a significant impact on the frequency of accidents in our area. Ultimately, our goal is to provide insights that may aid in improving road safety and reducing the number of accidents in “America’s Finest City”.
+As UCSD students, we are frequently driving around San Diego, and have thus witnessed our fair share of accidents in the city. With recent weather patterns growing increasingly unpredictable, we are eager to investigate whether there exists a correlation between weather and the frequency of accidents. A staggering 31,785 individuals lost their lives in traffic crashes in 2022. Shockingly, roughly one in every ten of these fatalities occurred in California. Our study aims to explore this potential relationship between weather conditions, seasons, and the daily frequency of accidents in San Diego. By carefully analyzing traffic data, we hope to uncover whether weather and seasonal changes hold a significant impact on the frequency of accidents in our area. Ultimately, our goal is to provide insights that may aid in improving road safety and reducing the number of accidents in “America’s Finest City”. [^1]
+
+[^1]: National Highway Traffic Safety Administration (https://www.cdc.gov/tobacco/data_statistics/surveys/nyts/index.htm) 
 
 
 ### Load packages
@@ -42,21 +44,12 @@ All together, our finalized and wrangled dataset included 23,915 accidents from 
 
 Here, we import our CSV file from Kaggle. This CSV file is enormous and is roughly 1.1 GB in size. We should note that we had some trouble getting the file to properly load and were experiencing constant RStudio crashes, so this prompted us to save the partially wrangled data as an rda file earlier than we expected. But, for the sake of fluidity, we have used echo=FALSE to remove these code chunks from our final Rmd. 
 
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
 crash <- read_csv("/home/cmcmanig/COGS 137/data_dream_team/US_Accidents_Dec21_updated.csv")
 ```
 
 
 ### Data Wrangling
-
-#### Filter For San Diego County and 2021
-
-First, we started off by filtering for San Diego County and crashes that happened in 2021. We will be saving our wrangled dataset by the name of "crash". 
-
-```{r, eval = FALSE}
-crash <- crash |>
-  filter(County == "San Diego", Year == 2021)
-```
 
 #### Extract Year, Month, and Day and Create Variables
 
@@ -72,6 +65,15 @@ crash$Month <- substr(crash$Start_Time, 6, 7)
 
 ```{r, eval = FALSE}
 crash$Day <- substr(crash$Start_Time, 9, 10)
+```
+
+#### Filter For San Diego County and 2021
+
+First, we started off by filtering for San Diego County and crashes that happened in 2021. We will be saving our wrangled dataset by the name of "crash". 
+
+```{r, eval = FALSE}
+crash <- crash |>
+  filter(County == "San Diego", Year == 2021)
 ```
 
 #### Create Date Variable
@@ -201,7 +203,7 @@ crash <- crash |>
 
 #### Create Daily Accident Total
 - 
-```{r}
+```{r, eval = FALSE}
 crash <- crash |>
   group_by(Day, Month, Year) |>
   mutate(Daily_total = n()) |>
@@ -210,7 +212,7 @@ crash <- crash |>
 
 #### Create Season Variable
 - 
-```{r}
+```{r, eval = FALSE}
 crash <- crash |>
   mutate(Season = case_when(
     Month %in% c(12, 1, 2) ~ "Winter",
@@ -342,7 +344,7 @@ ggplot(crash, mapping = aes(y = Weather_category)) +
 It is important as well to observe the relationship between seasons and weather categories as well in order to understand if these two variables might have any worthwhile correlation with total daily accidents. After viewing the distribution of weather conditions by seasons and were certain weather conditions are represented more than others, we notice that Fair and Cloudy are among the most prevalent of weather conditions regardless of the season. Winter and Fall however have the greatest representation (in terms of percentage) of stormy and cloudy and all other weather as well.
 
 ```{r}
-ggplot(y, mapping = aes(x = Season, fill = Weather_category)) + 
+ggplot(crash, mapping = aes(x = Season, fill = Weather_category)) + 
   geom_bar(position = "stack", aes(fill = Weather_category)) +
   labs(title = "Relationship between Seasons and Weather Conditions", subtitle = "Frequency of weather conditions broken down by its frequency rate within seasons as context.",
        x = "Seasons", y = "Weather Conditions by Season", fill = "Weather Conditions")
