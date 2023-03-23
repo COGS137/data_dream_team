@@ -14,7 +14,6 @@ As UCSD students, we are frequently driving around San Diego, and have thus witn
 
 [^1]: National Highway Traffic Safety Administration (https://www.cdc.gov/tobacco/data_statistics/surveys/nyts/index.htm) 
 
-
 ### Load packages
 ```{r load-packages, message=FALSE}
 library(tidyverse)
@@ -368,7 +367,6 @@ ggplot(crash, mapping = aes(y = fct_infreq(Weather_category))) +
   theme_minimal() +
   theme(plot.title.position = "plot") +
   guides(fill = "none")
-
 ```
 
 #### Weather Conditions Broken Down by Seasons
@@ -440,16 +438,13 @@ ggplot(crash, mapping = aes(x = Date, y = Daily_total, color = Season)) +
 ```
 
 
-
-
 ### Data Analysis
 
 In this section, we will delve deeper into the data we have collected through our Exploratory Analysis and run statistical analysis to gain more insights. Our main objective is to identify patterns and relationships within the data and draw meaningful conclusions. We will begin by calculating and analyzing which days and months had the highest number of accidents, and determine if there are any significant trends or patterns in this regard. 
 
-Furthermore, we will explore any possible relationships between the number of accidents and weather conditions, such as rainfall, temperature, and visibility. We will also examine how the season may affect accident rates and identify any notable trends. By doing so, we aim to provide a comprehensive and insightful analysis that sheds light on the factors that contribute to accidents in San Diego County.
+Furthermore, we will explore any possible relationships between the number of accidents and weather conditions, such as precipitation, temperature, and visibility. We will also examine how the season may affect accident rates and identify any notable trends. By doing so, we aim to provide a comprehensive and insightful analysis that sheds light on the factors that contribute to accidents in San Diego County.
 
-
-#### Question 1: Based on the 2021 accident records in San Diego County, which day and month have the most accidents?
+#### **Question 1: Based on the 2021 accident records in San Diego County, which day and month have the most accidents?**
 
 To determine the day and month with the highest number of accidents, we will first identify the date on which the greatest number of accidents occurred. This will involve analyzing the number of accidents on different dates, such as March 3rd and December 31st, and comparing them to find the date with the most accidents. Once we have identified the date, we can then proceed to examine the frequency of accidents on that date across different months, to determine which month had the most accidents overall.
 
@@ -474,6 +469,7 @@ num_acc |>
         legend.position = "none") +
   geom_text(
     aes(label = num_of_accident),
+    hjust = 1.2,
     position = position_dodge(width = 0.7),
     size = 3,
     color = "Black"
@@ -539,18 +535,56 @@ The first graph provides a visual representation of the top 20 dates with the hi
 
 "The second and third graphs display the total and average number of accidents per month, respectively. Both graphs consistently show that December had the highest number of accidents. This finding is in line with the trends observed in the Exploratory Analysis section, which revealed a peak in the number of accidents in December. To further support this conclusion, we calculated the total and average number of accidents per month and arrived at the same result. Therefore, we can confidently state that December had the most accidents in 2021 in San Diego county.
 
+#### Question 2: **How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?**
 
-#### Question 2: How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?
+First, we took a look at the top 20 dates with the most accidents in a day. From this, we can see that there is a cluster of high-frequency daily totals in winter months. However, there are some dates near April 2021, and we don't want to truncate these dates and cast them off as outliers. We will keep the dataset with 20 dates, and generate a barplot to see which seasons are most frequent.
 
+```{r}
+df <- crash [, c("Date", "Daily_total")]
+df <- df %>% distinct
+df <- df |> group_by("Date")
+df <- df[order(-df$Daily_total),]
+top_dates <- head(df, 20)
 
+ggplot(top_dates, aes(x = Date, y = Daily_total)) + 
+  geom_bar(stat = "identity", fill = "blue") + 
+  labs(title = "Top 10 Dates with the Highest Daily Total of Accidents in San Diego", 
+       subtitle = "The dates with the highest frequency of accidents are mostly in the winter",
+       x = "Month", 
+       y= "Daily Total of Accidents") +
+  theme_minimal() +
+  theme(plot.title.position = "plot")
+```
 
+```{r}
+top_20_dates <- head(df$Date, 20)
+crash_filtered <- crash %>% filter(Date %in% top_20_dates)
+
+crash_relationships <- lm(Daily_total ~ Weather_category + Precipitation + Visibility + Pressure + Humidity + Wind_chill + Temperature + Season, data = crash_filtered)
+
+summary(crash_relationships)
+```
 
 #### Q2: What's the answer?
+From the model, we can conclude that the season and weather conditions that impact the frequency of accidents on a given day in 2021 are the winter season and fair weather, and the relationship between the season and weather conditions is jointly significant. Below is a piece-by-piece analysis of the model.
 
+The "Foggy" and "Stormy" categories in the “Weather_category” variable have negative coefficients, indicating that crashes are less likely to occur in these weather conditions compared to the "Fair" weather condition. This was an interesting result - that car accidents are more likely to occur in fair weather. This could be attributed to the fact that drivers are generally more cautious in riskier weather, and could potentially be looked into in a further extension of this study.
+
+The coefficients for the continuous variables indicate the change in "Daily_total" for a one-unit increase in each predictor variable, holding all other variables constant. For example, a one-unit increase in "Precipitation" is associated with an increase of 225.92837 in "Daily_total".
+For seasons, "Winter" as the reference category and coefficient for "Spring" is negative, indicating that crashes are less likely to occur in spring compared to winter. This aligns with the plots we have done in Question 1 and our EDAs.
+
+The R-squared value indicates that the model explains about 43% of the variance in the response variable, and the Adjusted R-squared is slightly lower, taking into account the number of predictor variables.
+
+The multiple R-squared value is 0.4328, which means that about 43% of the variability in the daily total can be explained by the independent variables included in the model.
+
+The F-statistic measures the overall significance of the model, i.e., whether the independent variables as a group are significantly related to the dependent variable. The F-statistic value is 246.5, which is significant (p-value < 2.2e-16), indicating that the independent variables included in the model are jointly significant in explaining the variation in the daily total.
 
 
 ### Results
-- RESULTS HERE
+
+Question 1: 
+
+Question 2:
 
 ## Conclusion
 - CONCLUSION HERE
