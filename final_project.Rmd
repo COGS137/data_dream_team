@@ -313,74 +313,80 @@ crash |>
 
 The table displays the time of the day accidents in San Diego County in 2021. The majority of these accidents occurred during the day, likely due to frequent commuting and movement between places during daytime hours compared to nighttime.
 
-#### Distribution of Weather Conditions
-
-In order to help us answer the question of how does season and weather categories have any relationship with the frequency of accidents on a given day in 2021, and what is this relationship between them, we must first start off with visualizing the distribution of weather categories during the year 2021. By doing so we can see what was the least and most frequent weather categories which will help us understand it in the its correlation to total daily accidents.
 
 ```{r}
-ggplot(crash, mapping =  aes(y = fct_infreq(Weather_category))) +
-  geom_bar(fill = "blue") +
-  labs(title = "Distribution of Weather Conditions",
-       x = "Count",
-       y = "Weather Condition") +
-  theme(plot.title.position = "plot") +
-  theme_minimal()
+crash <- crash 
+crash <- na.omit(crash)
 ```
 
-#### Weather Conditions Broken Down by Seasons
+Omit NA entries from the dataset 
 
-It is important as well to observe the relationship between seasons and weather categories as well in order to understand if these two variables might have any worthwhile correlation with total daily accidents. We notice that Fair and Cloudy are among the most prevalent of weather conditions regardless of the season.
+## Distribution of weather conditions
+
+In order to help us answer the question of how does season and weather categories have any relationship with the frequency of accidents on a given day in 2021, and what is this relationship between them, we must first start off with visualizing the distribution of weather categories during the year 2021. By doing so we can see what was the least and most frequent weather conditions which in turn will help us understand it in the contesxt of its correlation to total daily accidents. We decided the best method at achieving this first observation would be through a bar plot that encapsulates the distrbution of weather conditions.
 
 ```{r}
-ggplot(crash, mapping = aes(x = Season, fill = Weather_category)) + 
-  geom_bar(position = "stack") +
-  labs(title = "Relationship between Seasons and Weather Conditions", 
-       x = "Season", y = "Count", fill = "Weather Conditions") +
-  theme(plot.title.position = "plot") +
-  theme_minimal()
+ggplot(crash, mapping = aes(y = Weather_category)) +
+  geom_bar(aes(fill = Weather_category)) + 
+  scale_fill_hue() +  
+  labs(title = "Frequency of Weather Conditions",
+       subtitle = "Distribtuion of weather conditions throughout 2021 in San Diego.",
+       x = "Count of Observed Weather Conditions",
+       y = "Weather Conditions",
+       fill = "Weather Conditions")
+
 ```
 
-#### Daily Total Accidents Broken Down By Weather Conditions
+## Weather Conditions Broken Down by Seasons
 
-After the aforementioned visualizations has taken place, we then move on to observing the relationship between the number of total daily accidents with weather categories, noticing that fair is the outlier when it comes to accidents broken down by weather category.
+It is important as well to observe the relationship between seasons and weather categories as well in order to understand if these two variables might have any worthwhile correlation with total daily accidents. After viewing the distribution of weather conditions by seasons and were certain weather conditions are represented more than others, we notice that Fair and Cloudy are among the most prevalent of weather conditions regardless of the season. Winter and Fall however have the greatest representation (in terms of percentage) of stormy and cloudy and all other weather as well.
 
 ```{r}
-ggplot(crash, mapping = aes(x = Daily_total, y = fct_infreq(Weather_category))) +
-  geom_bar(stat = "summary", fun = "sum", fill = "darkgreen") +
-  labs(title = "Number of Accidents by Weather Condition",
-       y = "Weather Condition",
-       x = "Number of Accidents") +
-  theme(plot.title.position = "plot") +
-  theme_minimal()
+ggplot(y, mapping = aes(x = Season, fill = Weather_category)) + 
+  geom_bar(position = "stack", aes(fill = Weather_category)) +
+  labs(title = "Relationship between Seasons and Weather Conditions", subtitle = "Frequency of weather conditions broken down by its frequency rate within seasons as context.",
+       x = "Seasons", y = "Weather Conditions by Season", fill = "Weather Conditions")
 ```
 
-#### Distribution of Accidents by Season
+## Daily Total Accidents Broken Down By Weather Conditions
 
-In the same vein we also check the relationship between seasons and observe that Winter and Fall are the seasons in which the most amount of accidents occur.
+After the aforementioned visualizations, we then move on to observing the relationship between accidents with weather condition, noticing that Fair is a skewing outlier when it comes to accidents broken down by weather category. A close second is Cloudy which aligns with the general consensus thus forth that these two weather conditions are among the most prevalent in frequency throughout the year, as well as in terms of its frequency with accidents. 
 
 ```{r}
-ggplot(crash, mapping = aes(x = Daily_total, y = fct_infreq(Season))) + 
-  geom_bar(stat = "identity", fill = "steelblue") +
-   labs(title = "Distribution of accidents by season",
+ggplot(crash, mapping = aes(x = Daily_total, y = Weather_category)) +
+  geom_bar(stat = "summary", fun = "sum", aes(fill = Weather_category)) +
+  labs(title = "Accidents by Weather Categories", subtitle = "A count of accidents by weather conditions throughout the year",
+       y = "Weather Conditions",
+       x = "Count of Accidents", fill = "Weather Conditions")
+
+```
+
+## Distribution of Accidents by Season
+
+Via the same logic as above, we aim to now observe the relationship between accidents and season, and here we notice that winter contains the most count of accidents. We are starting to notice a trend that colder seasons like winter and fall, with winter having the greatest variation of weather conditions, and winter + fall having the greatest prevalence of stormy and cloudy weather are consistently showing a considerable frequency of accidents as opposed to warmer season with less varied weather conditions. 
+
+```{r}
+ggplot(crash, mapping = aes(x = Daily_total, y = Season)) + 
+  geom_bar(stat = "identity", aes(fill = Season)) +
+   labs(title = "Distribution of accidents by season", subtitle =  "A count of accidents broken down by seasons throughtout 2021",
        y = "Season",
-       x = "Number of Accidents") +
-  theme_minimal()
+       x = "Number of Accidents", fill = "Seasons")
+
 ```
 
-#### ScatterPlot for Total Daily Accidents by Season And Date in 2021
+## ScatterPlot for Total Daily Accidents by Season And Date in 2021
 
-Finally, we create a scatterplot where we observe total daily accidents by date and season, again recognizing that winter and fall have the greatest peaks in total daily accidents. This causes us to wonder what these peaks may be correlated with, perhaps there is more travel during these seasons, or maybe weather conditions play a role. 
+Finally, we create a scatter plot where we observe total daily accidents by date and season. Again we recognize that winter has the greatest count of accidents throughout the year, with the highest peak during the beginning and end of the year. The second would be fall with again the second most entries for accidents throughout the year and having the next highest peaks towards the end of the year. The warmer seasons, spring and summer have the least frequency in accidents. This agrees with the conclusions our previous EDAs came to: that colder seasons with more variation in weather conditions, and particularly a greater representation of cloudy and stormy weathers show a certain positive correlation with accidents.
 
 ```{r}
+
 ggplot(crash, mapping = aes(x = Date, y = Daily_total, color = Season)) +
   geom_point() +
   scale_color_manual(values = c("blue", "green", "orange", "purple"), 
                      labels = c("Fall", "Spring", "Summer", "Winter")) +
-  labs(x = "Date", y = "Total Accidents", title = "Accidents by Date and Season", 
+  labs(x = "Date", y = "Accidents", title = "Accidents by Date and Season", subtitle =  "Frequency of accidents throughout the year in a seasonal breakdown",
        color = "Season") +
-  theme(legend.position = "bottom",
-        plot.title.position = "plot") +
-  theme_minimal()
+  theme(legend.position = "bottom")
 ```
 
 
