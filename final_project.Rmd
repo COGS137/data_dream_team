@@ -210,7 +210,9 @@ crash |>
 ```
 
 #### Arrange in Chronological Order and Fix City Values
-- 
+
+We decided to then re-arrange our data in chronological order from 01/01/2021 to 12/31/2021. When we took a looked at our cities within San Diego County, we noticed that San Clemente city was listed a handful of times. This led us to beleive that this must of been an error when the dataset was created and we thought it was best to remove these observations. 
+
 ```{r, eval = FALSE}
 crash <- crash |>
   arrange(Year, Month, Day) |>
@@ -220,7 +222,9 @@ crash <- crash |>
 ```
 
 #### Create Daily Accident Total
-- 
+
+Next, we created our Daily_total variable that tallied the number of accidents on each day in 2021. We grouped by Day, Month, and Year, and then took the sum of these groupings. Also, we made sure to ungroup our group_by call to leave the data as we had it. 
+
 ```{r, eval = FALSE}
 crash <- crash |>
   group_by(Day, Month, Year) |>
@@ -229,7 +233,9 @@ crash <- crash |>
 ```
 
 #### Create Season Variable
-- 
+
+After, we used a mutate call to create our Season variables and did this by selecting our desired months in each season. We should note that we thought that this was the most efficient way of doing this.
+
 ```{r, eval = FALSE}
 crash <- crash |>
   mutate(Season = case_when(
@@ -241,14 +247,18 @@ crash <- crash |>
 ```
 
 #### Rearange Variables into Our Desired Order
-- 
+
+Finally, we use another select call to tidy up our remaining variables and put them in the order we wanted. You will notice we inserted our newly created variables from above in the spots that we felt were best.
+
 ```{r, eval = FALSE}
 crash <- crash |>
   select("ID", "Day", "Month", "Year", "Date", "Season", "Zipcode", "County", "City", "Severity", "Latitude", "Longitude", "Distance", "Side", "Time_of_day", "Daily_total", "Temperature", "Wind_chill", "Humidity", "Pressure", "Visibility", "Wind_direction", "Wind_speed", "Precipitation", "Weather_category", "Amenity", "Bump", "Crossing", "Give_way", "Junction", "No_exit", "Railway", "Roundabout", "Station", "Stop", "Traffic_calming", "Traffic_signal", "Turning_loop")
 ```
 
 #### Save the Data
-- Here we save our finalized tibble that we will use for our EDA and analysis.
+
+Here we save our finalized tibble called crash. Our data is now tidy and in a format that is ready for our EDA and analysis. 
+
 ```{r, eval = FALSE}
 save(crash, file = "final_wrangled_crash.rda")
 ```
@@ -342,7 +352,7 @@ crash <- na.omit(crash)
 
 Omit NA entries from the dataset 
 
-#### Distribution of weather conditions
+#### Distribution of Weather Conditions
 
 In order to help us answer the question of how does season and weather categories have any relationship with the frequency of accidents on a given day in 2021, and what is this relationship between them, we must first start off with visualizing the distribution of weather categories during the year 2021. By doing so we can see what was the least and most frequent weather conditions which in turn will help us understand it in the contesxt of its correlation to total daily accidents. We decided the best method at achieving this first observation would be through a bar plot that encapsulates the distrbution of weather conditions.
 
@@ -377,7 +387,7 @@ ggplot(crash, mapping = aes(x = Season, fill = Weather_category)) +
   theme(plot.title.position = "plot")
 ```
 
-#### Daily Total Accidents Broken Down By Weather Conditions
+#### Daily Total Accidents Broken Down by Weather Conditions
 
 After the aforementioned visualizations, we then move on to observing the relationship between accidents with weather condition, noticing that Fair is a skewing outlier when it comes to accidents broken down by weather category. A close second is Cloudy which aligns with the general consensus thus forth that these two weather conditions are among the most prevalent in frequency throughout the year, as well as in terms of its frequency with accidents. 
 
@@ -410,7 +420,7 @@ ggplot(crash, mapping = aes(x = Daily_total, y = Season)) +
   guides(fill = "none")
 ```
 
-#### Scatterplot for Total Daily Accidents by Season And Date in 2021
+#### Scatterplot for Total Daily Accidents by Season and Date in 2021
 
 Finally, we create a scatter plot where we observe total daily accidents by date and season. Again we recognize that winter has the greatest count of accidents throughout the year, with the highest peak during the beginning and end of the year. The second would be fall with again the second most entries for accidents throughout the year and having the next highest peaks towards the end of the year. The warmer seasons, spring and summer have the least frequency in accidents. This agrees with the conclusions our previous EDAs came to: that colder seasons with more variation in weather conditions, and particularly a greater representation of cloudy and stormy weathers show a certain positive correlation with accidents.
 
@@ -428,6 +438,8 @@ ggplot(crash, mapping = aes(x = Date, y = Daily_total, color = Season)) +
   theme(legend.position = "bottom",
         plot.title.position = "plot")
 ```
+
+
 
 
 ### Data Analysis
@@ -526,6 +538,7 @@ num_acc_mon |>
 The first graph provides a visual representation of the top 20 dates with the highest number of accidents that occurred in San Diego County during the year 2021. From the graph, it is evident that December 14th, 2021 had the highest number of accidents, providing a clear answer to our question. December 14th had 379 accidents which is very surprising.
 
 "The second and third graphs display the total and average number of accidents per month, respectively. Both graphs consistently show that December had the highest number of accidents. This finding is in line with the trends observed in the Exploratory Analysis section, which revealed a peak in the number of accidents in December. To further support this conclusion, we calculated the total and average number of accidents per month and arrived at the same result. Therefore, we can confidently state that December had the most accidents in 2021 in San Diego county.
+
 
 #### Question 2: How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?
 
