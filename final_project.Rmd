@@ -12,7 +12,7 @@ output:
 
 As UCSD students, we are frequently driving around San Diego, and have thus witnessed our fair share of accidents in the city. With recent weather patterns growing increasingly unpredictable, we are eager to investigate whether there exists a correlation between weather and the frequency of accidents. A staggering 31,785 individuals lost their lives in traffic crashes in 2022. Shockingly, roughly one in every ten of these fatalities occurred in California. Our study aims to explore this potential relationship between weather conditions, seasons, and the daily frequency of accidents in San Diego. By carefully analyzing traffic data, we hope to uncover whether weather and seasonal changes hold a significant impact on the frequency of accidents in our area. Ultimately, our goal is to provide insights that may aid in improving road safety and reducing the number of accidents in “America’s Finest City”. [^1]
 
-[^1]: National Highway Traffic Safety Administration (https://www.cdc.gov/tobacco/data_statistics/surveys/nyts/index.htm) 
+[^1]: National Highway Traffic Safety Administration (https://crashstats.nhtsa.dot.gov/Api/Public/ViewPublication/813406) 
 
 ### Load packages
 ```{r load-packages, message=FALSE}
@@ -460,7 +460,7 @@ num_acc |>
   ggplot(aes(y = reorder(Date, num_of_accident), x = num_of_accident, fill = num_of_accident)) +
   geom_bar(stat = "identity") +
   scale_fill_gradient(low = "beige", high = "blue") +
-  labs(title = "December 14th had the most accident in 2021, San Diego County",
+  labs(title = "December 14th had the Most Accidents in 2021, San Diego County",
        subtitle = "List of top 20 dates across 2021",
        x = "Number of Accidents") +
   theme_minimal() +
@@ -469,7 +469,7 @@ num_acc |>
         legend.position = "none") +
   geom_text(
     aes(label = num_of_accident),
-    hjust = 1.2,
+    hjust = 0.01,
     position = position_dodge(width = 0.7),
     size = 3,
     color = "Black"
@@ -489,7 +489,7 @@ num_acc_mon |>
   ggplot(aes(y = reorder(Month, monthly_acc), x = monthly_acc, fill=monthly_acc)) +
   geom_bar(stat = "identity") +
   scale_fill_gradient(low = "beige", high = "red")+
-  labs(title = "December has the most accident in 2021, San Diego County",
+  labs(title = "December has the Most Accidents in 2021, San Diego County",
        x = "Number of Accidents") +
   theme_minimal() +
   theme(axis.title.y = element_blank(),
@@ -498,10 +498,10 @@ num_acc_mon |>
   geom_text(
     aes(label = monthly_acc),
     position = position_dodge(width = 0.7),
+    hjust = 0.01,
     size = 3,
     color = "Black"
   )
-  
 ```
 
 ```{r}
@@ -515,7 +515,7 @@ num_acc_mon |>
   ggplot(aes(y = reorder(Month, monthly_acc), x = monthly_acc, fill = monthly_acc)) +
   geom_bar(stat = "identity") +
   scale_fill_gradient(low = "beige", high = "Dark Green") +
-  labs(title = "December has the most average number of accident in 2021, San Diego County",
+  labs(title = "December has the Most Average Number of Accidents in 2021, San Diego County",
        x = "Number of Accidents") +
   theme_minimal() +
   theme(axis.title.y = element_blank(),
@@ -566,6 +566,7 @@ summary(crash_relationships)
 ```
 
 #### Q2: What's the answer?
+
 From the model, we can conclude that the season and weather conditions that impact the frequency of accidents on a given day in 2021 are the winter season and fair weather, and the relationship between the season and weather conditions is jointly significant. Below is a piece-by-piece analysis of the model.
 
 The "Foggy" and "Stormy" categories in the “Weather_category” variable have negative coefficients, indicating that crashes are less likely to occur in these weather conditions compared to the "Fair" weather condition. This was an interesting result - that car accidents are more likely to occur in fair weather. This could be attributed to the fact that drivers are generally more cautious in riskier weather, and could potentially be looked into in a further extension of this study.
@@ -582,9 +583,9 @@ The F-statistic measures the overall significance of the model, i.e., whether th
 
 ### Results
 
-Question 1: 
+After conducting an in-depth analysis of our first question regarding the day and month with the highest number of accidents in 2021, we have arrived at a conclusive finding. It appears that in 2021, December 14th and the entire month of December experienced the greatest number of accidents. In our analysis section, we plotted three plots to show the days and months with the highest number of accidents. Upon examining the results, we discovered that December contained a significantly higher daily average than all other months. Remarkably, December 14th alone accounted for roughly 130-240 more accidents than the other top 19 days with the most accidents. December had a whooping 4,055 total accidents, which was a little less than double the month with the second most accidents(October). These results sparked our curiosity and lead us to question what the potential causes could be. Considering that December goes hand in hand with the holiday season, which is know for extensive travel, hurried last minute shopping, and colder weather patterns, we think that our results intuitively make sense. It would be interesting to extend this analysis to other years as well. For example, we could analyze similar relationships, but across a longer time period and this might allow us to pinpoint additional trends within the data. 
 
-Question 2:
+
 
 ## Conclusion
-- CONCLUSION HERE
+
