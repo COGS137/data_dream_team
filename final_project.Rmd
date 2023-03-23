@@ -575,7 +575,6 @@ back_ward <- ols_step_all_possible(crash_relationships) |>
 head(back_ward)
 ```
 
-
 #### Analysis: Q2 - What's the answer?
 
 From the model, we can conclude that the season and weather conditions that impact the frequency of accidents on a given day in 2021 are the winter season and fair weather, and the relationship between the season and weather conditions is jointly significant. Below is a piece-by-piece analysis of the model.
@@ -596,7 +595,7 @@ The F-statistic measures the overall significance of the model, i.e., whether th
 
 After conducting an in-depth analysis of our first question regarding the day and month with the highest number of accidents in 2021, we have arrived at a conclusive finding. It appears that in 2021, December 14th and the entire month of December experienced the greatest number of accidents. In our analysis section, we plotted three plots to show the days and months with the highest number of accidents. Upon examining the results, we discovered that December contained a significantly higher daily average than all other months. Remarkably, December 14th alone accounted for roughly 130-240 more accidents than the other top 19 days with the most accidents. December had a whooping 4,055 total accidents, which was a little less than double the month with the second most accidents(October). These results sparked our curiosity and lead us to question what the potential causes could be. Considering that December goes hand in hand with the holiday season, which is know for extensive travel, hurried last minute shopping, and colder weather patterns, we think that our results intuitively make sense. It would be interesting to extend this analysis to other years as well. For example, we could analyze similar relationships, but across a longer time period and this might allow us to pinpoint additional trends within the data. 
 
-
+Our results also indicate that there is a positive correlation between the season and weather categories and the frequency of accidents on a given day in 2021. Winter and Fall, which had the greatest differences in weather category, particularly with respect to stormy and cloudy, yielded higher peaks in total daily accidents compared to other seasons like Spring or Summer. This indicates that when it rains or is overcast (especially during Winter & Fall), drivers should be more cautious since this could lead to an increase in accident rates. Additionally, even though fair was found to have an over representation of total daily accidents due to San Diego not having highly varying climate patterns throughout the year; we did still find evidence for a relationship between inclement weather conditions such as those aforementioned correlating with greater numbers of accident incidents on any given day during 2021.
 
 ## Conclusion
 
