@@ -351,7 +351,7 @@ crash <- na.omit(crash)
 
 Omit NA entries from the dataset 
 
-#### Distribution of Weather Conditions
+#### EDA: Distribution of Weather Conditions
 
 In order to help us answer the question of how does season and weather categories have any relationship with the frequency of accidents on a given day in 2021, and what is this relationship between them, we must first start off with visualizing the distribution of weather categories during the year 2021. By doing so we can see what was the least and most frequent weather conditions which in turn will help us understand it in the contesxt of its correlation to total daily accidents. We decided the best method at achieving this first observation would be through a bar plot that encapsulates the distrbution of weather conditions.
 
@@ -369,7 +369,7 @@ ggplot(crash, mapping = aes(y = fct_infreq(Weather_category))) +
   guides(fill = "none")
 ```
 
-#### Weather Conditions Broken Down by Seasons
+#### EDA: Weather Conditions Broken Down by Seasons
 
 It is important as well to observe the relationship between seasons and weather categories as well in order to understand if these two variables might have any worthwhile correlation with total daily accidents. After viewing the distribution of weather conditions by seasons and were certain weather conditions are represented more than others, we notice that Fair and Cloudy are among the most prevalent of weather conditions regardless of the season. Winter and Fall however have the greatest representation (in terms of percentage) of stormy and cloudy and all other weather as well.
 
@@ -385,7 +385,7 @@ ggplot(crash, mapping = aes(x = Season, fill = Weather_category)) +
   theme(plot.title.position = "plot")
 ```
 
-#### Daily Total Accidents Broken Down by Weather Conditions
+#### EDA: Daily Total Accidents Broken Down by Weather Conditions
 
 After the aforementioned visualizations, we then move on to observing the relationship between accidents with weather condition, noticing that Fair is a skewing outlier when it comes to accidents broken down by weather category. A close second is Cloudy which aligns with the general consensus thus forth that these two weather conditions are among the most prevalent in frequency throughout the year, as well as in terms of its frequency with accidents. 
 
@@ -401,7 +401,7 @@ ggplot(crash, mapping = aes(x = Daily_total, y = fct_infreq(Weather_category))) 
   guides(fill = "none")
 ```
 
-#### Distribution of Accidents by Season
+#### EDA: Distribution of Accidents by Season
 
 Via the same logic as above, we aim to now observe the relationship between accidents and season, and here we notice that winter contains the most count of accidents. We are starting to notice a trend that colder seasons like winter and fall, with winter having the greatest variation of weather conditions, and winter + fall having the greatest prevalence of stormy and cloudy weather are consistently showing a considerable frequency of accidents as opposed to warmer season with less varied weather conditions. 
 
@@ -418,7 +418,7 @@ ggplot(crash, mapping = aes(x = Daily_total, y = Season)) +
   guides(fill = "none")
 ```
 
-#### Scatterplot for Total Daily Accidents by Season and Date in 2021
+#### EDA: Scatterplot for Total Daily Accidents by Season and Date in 2021
 
 Finally, we create a scatter plot where we observe total daily accidents by date and season. Again we recognize that winter has the greatest count of accidents throughout the year, with the highest peak during the beginning and end of the year. The second would be fall with again the second most entries for accidents throughout the year and having the next highest peaks towards the end of the year. The warmer seasons, spring and summer have the least frequency in accidents. This agrees with the conclusions our previous EDAs came to: that colder seasons with more variation in weather conditions, and particularly a greater representation of cloudy and stormy weathers show a certain positive correlation with accidents.
 
@@ -444,7 +444,7 @@ In this section, we will delve deeper into the data we have collected through ou
 
 Furthermore, we will explore any possible relationships between the number of accidents and weather conditions, such as precipitation, temperature, and visibility. We will also examine how the season may affect accident rates and identify any notable trends. By doing so, we aim to provide a comprehensive and insightful analysis that sheds light on the factors that contribute to accidents in San Diego County.
 
-#### **Question 1: Based on the 2021 accident records in San Diego County, which day and month have the most accidents?**
+#### Analysis: **Question 1 - Based on the 2021 accident records in San Diego County, which day and month have the most accidents?**
 
 To determine the day and month with the highest number of accidents, we will first identify the date on which the greatest number of accidents occurred. This will involve analyzing the number of accidents on different dates, such as March 3rd and December 31st, and comparing them to find the date with the most accidents. Once we have identified the date, we can then proceed to examine the frequency of accidents on that date across different months, to determine which month had the most accidents overall.
 
@@ -529,13 +529,13 @@ num_acc_mon |>
   )
 ```
 
-#### Q1: What's the answer?
+#### Analysis: Q1 - What's the answer?
 
 The first graph provides a visual representation of the top 20 dates with the highest number of accidents that occurred in San Diego County during the year 2021. From the graph, it is evident that December 14th, 2021 had the highest number of accidents, providing a clear answer to our question. December 14th had 379 accidents which is very surprising.
 
 "The second and third graphs display the total and average number of accidents per month, respectively. Both graphs consistently show that December had the highest number of accidents. This finding is in line with the trends observed in the Exploratory Analysis section, which revealed a peak in the number of accidents in December. To further support this conclusion, we calculated the total and average number of accidents per month and arrived at the same result. Therefore, we can confidently state that December had the most accidents in 2021 in San Diego county.
 
-#### Question 2: **How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?**
+#### Analysis: **Question 2 - How does season and weather conditions impact the frequency of accidents on a given day in 2021, and what is the relationship between them?**
 
 First, we took a look at the top 20 dates with the most accidents in a day. From this, we can see that there is a cluster of high-frequency daily totals in winter months. However, there are some dates near April 2021, and we don't want to truncate these dates and cast them off as outliers. We will keep the dataset with 20 dates, and generate a barplot to see which seasons are most frequent.
 
@@ -565,7 +565,18 @@ crash_relationships <- lm(Daily_total ~ Weather_category + Precipitation + Visib
 summary(crash_relationships)
 ```
 
-#### Q2: What's the answer?
+To evaluate the effectiveness of our model in predicting the variability in daily total accidents, we will use a backward selection approach. The goal of this approach is to identify the most significant predictors in the model and eliminate any non-significant predictors. 
+
+After applying this method and comparing the resulting R-squared value with the original model, we found that the highest R-squared value was similar to the one obtained from our original model. Therefore, we will continue to use the original model in our analysis.
+
+```{r}
+back_ward <- ols_step_all_possible(crash_relationships) |>
+  arrange(desc(adjr))
+head(back_ward)
+```
+
+
+#### Analysis: Q2 - What's the answer?
 
 From the model, we can conclude that the season and weather conditions that impact the frequency of accidents on a given day in 2021 are the winter season and fair weather, and the relationship between the season and weather conditions is jointly significant. Below is a piece-by-piece analysis of the model.
 
